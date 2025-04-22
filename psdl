@@ -1,0 +1,143 @@
+Embedded C Programs - PIC18F4550
+1. Blink with Delay (Toggle LATB)
+#include <xc.h>
+#include <pic18f4550.h>
+void timedelay(unsigned int time) {
+ for (int i = 0; i < time; i++) {
+ for (int j = 0; j < 5000; j++);
+ }
+}
+void main(void) {
+ TRISB = 0x00;
+ LATB = 0xFF;
+ while (1) {
+ LATB = ~LATB;
+ timedelay(200);
+ }
+ return;
+}
+2. DCMotor PWM Control
+#include <pic18f4550.h>
+#define FREQ_PWM 50
+void initPWM() {
+ TRISCbits.TRISC1 = 0;
+ TRISCbits.TRISC2 = 0;
+ T2CONbits.T2CKPS = 0b11;
+ T2CONbits.TMR2ON = 1;
+ PR2 = 150;
+ CCP1CONbits.CCP1M = 0b1100;
+ CCP2CONbits.CCP2M = 0b1100;
+ CCPR1L = 128;
+ CCPR2L = 128;
+ INTCONbits.GIE = 1;
+}
+void setPWMDutyCycle(unsigned char motor, unsigned char dutyCycle) {
+ if (motor == 1) CCPR1L = dutyCycle;
+ else if (motor == 2) CCPR2L = dutyCycle;
+}
+void delay_ms(unsigned int ms) {
+ for (unsigned int i = 0; i < ms; i++) {
+ for (unsigned int j = 0; j < 1000; j++);
+ }
+}
+void main() {
+ initPWM();
+ setPWMDutyCycle(1, 128);
+ setPWMDutyCycle(2, 128);
+ while(1) {
+ for (unsigned char d = 0; d < 255; d++) { setPWMDutyCycle(1, d); delay_ms(50); }
+ for (unsigned char d = 255; d > 0; d--) { setPWMDutyCycle(1, d); delay_ms(50); }
+ for (unsigned char d = 0; d < 255; d++) { setPWMDutyCycle(2, d); delay_ms(50); }
+ for (unsigned char d = 255; d > 0; d--) { setPWMDutyCycle(2, d); delay_ms(50); }
+ }
+}
+3. UART Communication
+#include <pic18F4550.h>
+#include <xc.h>
+#include <stdio.h>
+#define Fosc 48000000UL
+void InitUART(unsigned int baudrate) {
+ TRISCbits.RC6 = 0;
+ TRISCbits.RC7 = 1;
+ SPBRG = (unsigned char)(((Fosc /64)/baudrate)-1);
+Embedded C Programs - PIC18F4550
+ BAUDCON = 0b00000000;
+ TXSTA = 0b00100000;
+ RCSTA = 0b10010000;
+}
+void SendChar(unsigned char data) {
+ while(TXSTAbits.TRMT == 0);
+ TXREG = data;
+}
+void putch(unsigned char data) {
+ SendChar(data);
+}
+unsigned char GetChar(void) {
+ while(!PIR1bits.RCIF);
+ return RCREG;
+}
+void main(void) {
+ InitUART(9600);
+ printf("\r\nHello MicroPIC-18F: Enter any Key from Keyboard\r\n");
+ while(1) {
+ printf("%c! ", GetChar());
+ }
+}
+4. Relay with INT1 Toggle
+#include <xc.h>
+#include <pic18f4550.h>
+#pragma config FOSC = HS
+#pragma config WDT = OFF
+#pragma config LVP = OFF
+#pragma config BOR = OFF
+#define _XTAL_FREQ 8000000
+volatile unsigned char relayState = 0;
+void initINT1(void) {
+ TRISBbits.TRISB1 = 1;
+ INTCON3bits.INT1IE = 1;
+ INTCON3bits.INT1IF = 0;
+ INTCON2bits.INTEDG1 = 0;
+ GIE = 1;
+ PEIE = 1;
+}
+void initRelay(void) {
+ TRISAbits.TRISA4 = 0;
+ LATAbits.LATA4 = 0;
+}
+void __interrupt() ISR(void) {
+ if (INTCON3bits.INT1IF) {
+ relayState = !relayState;
+ LATAbits.LATA4 = relayState;
+ INTCON3bits.INT1IF = 0;
+ }
+}
+void main(void) {
+ initINT1();
+ initRelay();
+ while(1);
+}
+5. Buzzer Timer1 Interrupt
+#include <xc.h>
+#define Buzzer LATAbits.LATA5
+unsigned int count = 0;
+void __interrupt() Timer1_ISR() {
+Embedded C Programs - PIC18F4550
+ if (TMR1IF == 1) {
+ TMR1L = 0x20;
+ TMR1H = 0xD1;
+ count++;
+ if (count > 1000) {
+ Buzzer = ~Buzzer;
+ count = 0;
+ }
+ TMR1IF = 0;
+ }
+}
+void main(void) {
+ TRISAbits.TRISA5 = 0;
+ GIE = 1; PEIE = 1; TMR1IE = 1; TMR1IF = 0;
+ T1CON = 0x80;
+ TMR1L = 0x02; TMR1H = 0xD1;
+ TMR1ON = 1;
+ while (1);
+}
