@@ -1,0 +1,252 @@
+#include<iostream>
+#include<cmath>
+using namespace std;
+
+struct student
+{
+
+    int rollno;
+    string name;
+    float sgpa;
+};
+
+class studentinfo
+{
+public:
+    void display(student s[], int n)
+    {
+        cout << "\nTop rankers are :\n\n";
+        for (int i = 0;i < n;i++)
+        {
+
+            cout << s[i].name << " (SGPA : " << s[i].sgpa << " )\n";
+        }
+    }
+    int partition(student s[], int l, int h)
+    {
+        float pivot = s[l].sgpa;
+        int i = l - 1;
+        int j = h + 1;
+        while (true)
+        {
+            do
+                i++;
+            while (s[i].sgpa > pivot);
+
+            do
+                j--;
+            while (s[j].sgpa < pivot);
+
+            if (i >= j)
+                return j;
+
+            swap(s[i], s[j]);
+        }
+    }
+
+    void quicksort(student s[], int l, int h)
+    {
+
+        if (l < h)
+        {
+            int j = partition(s, l, h);
+            quicksort(s, l, j);
+            quicksort(s, j + 1, h);
+        }
+    }
+
+    void insertionsort(student s[], int n)
+    {
+
+        for (int i = 1;i < n;i++)
+        {
+            string keyname = s[i].name;
+            int keyrollno = s[i].rollno;
+            float keysgpa = s[i].sgpa;
+            int j = i - 1;
+            while (j >= 0 && s[j].name > keyname)
+            {
+                s[j + 1] = s[j];
+                j--;
+            }
+            s[j + 1].name = keyname;
+            s[j + 1].rollno = keyrollno;
+            s[j + 1].sgpa = keysgpa;
+        }
+        cout << "\nThe sorted names are :\n";
+        for (int i = 0;i < n;i++)
+        {
+            cout << s[i].name << "\n";
+        }
+    }
+
+    void binarysearch(student s[], int n)
+    {
+        insertionsort(s, n);
+        string str;
+        cout << "\nEnter the name of student to be search :";
+        cin >> str;
+
+        int st = 0;
+        int e = n;
+        int mid = (st + e) / 2;
+
+        while (st <= e)
+        {   
+            int mid = (st + e) / 2;
+            if ((s[mid].name).compare(str) == 0)
+            {
+                cout << "\nStudent with name " << str << " found and the details are :";
+                cout << "\nName :" << s[mid].name;
+                cout << "\nRoll No :" << s[mid].rollno;
+                cout << "\nSGPA :" << s[mid].sgpa << "\n";
+                return;
+            }
+            if (s[mid].name > str)
+            {
+                e = mid - 1;
+            }
+            else
+            {
+                st = mid + 1;
+            }
+        }
+        if (st > e && (s[mid].name).compare(str) == 1)
+        {
+            cout << "Student with name " << str << " not found :";
+            return;
+        }
+    }
+
+    void linearsearch(student s[], int n)
+    {
+        float sg;
+        cout << "\nEnter SGPA of student :";
+        cin >> sg;
+        cout << "Name of student having SGPA " << sg << " are :\n";
+        for (int i = 0;i < n;i++)
+        {
+            if (s[i].sgpa == sg)
+            {
+                cout << s[i].name << "\n";
+            }
+        }
+    }
+
+    void bubblesort(student s[], int n)
+    {
+        int trollno;
+        string tname;
+        float tsgpa;
+        for (int i = 1;i < n;i++)
+        {
+            for (int j = 0;j < n - i;j++)
+            {
+                if (s[j].rollno > s[j + 1].rollno)
+                {
+                    trollno = s[j + 1].rollno;
+                    s[j + 1].rollno = s[j].rollno;
+                    s[j].rollno = trollno;
+
+                    tname = s[j + 1].name;
+                    s[j + 1].name = s[j].name;
+                    s[j].name = tname;
+
+                    tsgpa = s[j + 1].sgpa;
+                    s[j + 1].sgpa = s[j].sgpa;
+                    s[j].sgpa = tsgpa;
+                }
+            }
+        }
+
+        cout << "\nThe sorted Roll no are :\n\n";
+        for (int i = 0;i < n;i++)
+        {
+            cout << s[i].name << " (Roll No: " << s[i].rollno << ")\n";
+        }
+    }
+};
+
+int main()
+{
+    studentinfo si;
+    int n;
+    cout << "Enter number of students :";
+    cin >> n;
+    student s[n];
+
+    for (int i = 0;i < n;i++)
+    {
+        cout << "Enter Roll no of " << i + 1 << " student:";
+        cin >> s[i].rollno;
+        cout << "Enter name of " << i + 1 << " student:";
+        cin >> s[i].name;
+        cout << "Enter SGPA of " << i + 1 << " student:";
+        cin >> s[i].sgpa;
+        cout << "\n";
+    }
+    cout << "\n\n";
+    cout << "\n---------------------------------------------\n";
+    for (int i = 0;i < n;i++)
+    {
+        cout << "Roll no of " << i + 1 << " student is :" << s[i].rollno << "\n";
+        cout << "Name of " << i + 1 << " student is :" << s[i].name << "\n";
+        cout << "SGPA of " << i + 1 << " student is :" << s[i].sgpa << "\n";
+        cout << "\n";
+    }
+    cout << "---------------------------------------------\n";
+
+    int k = 1;
+    while (k > 0)
+    {
+        int n1;
+        cout << "\n\n1)Arrange list of students according to roll numbers in ascending order.";
+        cout << "\n2)Arrange list of students alphabetically.";
+        cout << "\n3)Toppers of the class.";
+        cout << "\n4)Search students according to SGPA.";
+        cout << "\n5)Search a particular student according to name.";
+        cout << "\nEnter your choice: ";
+        cin >> n1;
+
+        switch (n1)
+        {
+        case 1:
+        {
+            si.bubblesort(s, n);
+            break;
+        }
+        case 2:
+        {
+            si.insertionsort(s, n);
+            break;
+        }
+        case 3:
+        {
+
+            si.quicksort(s, 0, n);
+            si.display(s, n);
+            break;
+        }
+        case 4:
+        {
+            si.linearsearch(s, n);
+            break;
+        }
+
+        case 5:
+        {
+            si.binarysearch(s, n);
+            break;
+        }
+        default:
+        {
+            cout << "Enter correct choice.";
+            break;
+        }
+        }
+    }
+
+    return 0;
+}
+
+

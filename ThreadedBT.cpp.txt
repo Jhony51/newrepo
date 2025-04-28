@@ -1,0 +1,170 @@
+#include <bits/stdc++.h>
+#include <iostream>
+using namespace std;
+struct node
+{
+    int data;    // to store data
+    node *left;  // points towards left
+    node *right; // point towards right
+    bool lthr;   // left thread
+    bool rthr;   // right thread
+    node(int val)
+    {
+        data = val;
+        left = right = nullptr;
+        lthr = rthr = 1;
+    }
+};
+
+node *getnode(int c)
+{ // to set variables new address
+    return new node(c);
+}
+
+// add element at given position
+node *insert(node *root, int c)
+{
+    if (root == nullptr)
+    {
+        return getnode(c); // Handle empty tree case
+    }
+    node *t = root;
+    queue<node *> q;
+    q.push(t);
+    while (!q.empty())
+    {
+        t = q.front();
+        q.pop();
+        if (t->lthr)
+        {
+            node *n = getnode(c);
+            n->left = t->left;
+            t->left = n;
+            n->right = t;
+            t->lthr = false;
+
+            break;
+        }
+        else if (t->rthr)
+        {
+            node *n = getnode(c);
+            n->right = t->right;
+            t->right = n;
+            n->left = t;
+            t->rthr = false;
+            break;
+        }
+        else
+        {
+            q.push(t->left);
+            q.push(t->right);
+        }
+    }
+    return root; // Return the modified tree
+}
+
+node *header = new node(-1); // Dummy header
+
+node *create()
+{                                          // take value from user and pass it to insert
+    header->left = header->right = header; // Point to itself
+    header->lthr = header->rthr = true;
+    cout << "Enter root: ";
+    int r;
+    cin >> r;
+    node *n = getnode(r);
+    n->left = header;  // Set left link to header
+    header->left = n;  // Set header's left link to the new root
+    n->right = header; // Set right link to header
+    int ele;
+    cout << "Enter Number of Elements to be Added: ";
+    cin >> ele;
+    for (int i = 0; i < ele; i++)
+    {
+        cout << "Enter Value: ";
+        int val;
+        cin >> val;
+
+        insert(header->left, val); // Use header's left to maintain
+        // root reference
+    }
+    return header->left; // Return the root node
+}
+
+node *insucc(node *t)
+{ // to find inorder successor
+    t = t->right;
+    while (t->lthr == 0)
+    {
+        t = t->left;
+    }
+    return t;
+}
+
+void inorder(node *root)
+{
+    node *t = root;
+    while (t->lthr == 0)
+    {
+        t = t->left;
+    }
+    while (t != header)
+    {
+        cout << t->data << " ";
+        if (t->rthr == 0)
+        {
+            t = insucc(t);
+        }
+        else
+        {
+            t = t->right;
+        }
+    }
+}
+
+node *presucc(node *t)
+{ // to find preorder successor
+    t = t->right;
+    while (t->lthr == 0)
+    {
+        cout << t->data << " ";
+        t = t->left;
+    }
+    return t;
+}
+
+void preorder(node *root)
+{ // for preorder traversal
+
+    node *t = root;
+    while (t->lthr == 0)
+    {
+        cout << t->data << " ";
+        t = t->left;
+    }
+    cout << t->data << " ";
+    while (t != header)
+    {
+        if (t->rthr == 0)
+        {
+            t = presucc(t);
+            cout << t->data << " ";
+        }
+        else
+        {
+            t = t->right;
+        }
+    }
+}
+
+int main()
+{
+    node *root = create(); // to set root
+    cout << "Inorder traversal: ";
+    inorder(root);
+    cout << endl;
+    cout << "Preorder traversal: ";
+    preorder(root);
+    cout << endl;
+    return 0;
+}

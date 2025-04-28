@@ -1,0 +1,108 @@
+#include <iostream>
+using namespace std;
+#define n 5
+
+class Queues
+{
+public:
+    int queues[n], front, rear;
+
+    Queues()
+    {
+        front = -1;
+        rear = -1;
+    }
+
+    void Enqueue(int x)
+    {
+        if ((rear + 1) % n == front)
+        {
+            cout << "\nOVERFLOW for element :" << x << endl;
+        }
+        else if (rear == -1 && front == -1)
+        {
+            rear = 0;
+            front = 0;
+            queues[rear] = x;
+        }
+        else
+        {
+            rear = (rear + 1) % n;
+            queues[rear] = x;
+        }
+    }
+
+    void Dequeue()
+    {
+        if (front == -1 && rear == -1)
+        {
+            cout << "\nUNDERFLOW/Empty" << endl;
+        }
+        else if (front == rear)
+        {
+            front = -1;
+            rear = -1;
+        }
+        else
+        {
+            cout << "\nElement Removed : " << queues[front] << endl;
+            front = (front + 1) % n;
+        }
+    }
+
+    void Display()
+    {
+        int i = front;
+        if (front == -1 && rear == -1)
+        {
+            cout << "\nQueue is Empty" << endl;
+        }
+        else
+        {
+            cout << "\nThe Queue is : " << endl;
+            while (i != rear)
+            {
+                cout << queues[i] << ",";
+                i = (i + 1) % n;
+            }
+            cout << queues[rear] << endl;
+        }
+    }
+};
+
+int main()
+{
+    Queues q;
+
+    q.Enqueue(10);
+    q.Enqueue(55);
+    q.Enqueue(2);
+    q.Enqueue(37);
+    q.Enqueue(71);
+
+    q.Display();
+
+    // Overflow
+    q.Enqueue(99999999);
+
+    q.Dequeue();
+
+    q.Display();
+    q.Dequeue();
+
+    q.Display();
+    q.Dequeue();
+
+    q.Display();
+    q.Dequeue();
+
+    q.Display();
+    q.Dequeue();
+
+    q.Display();
+
+    // Underflow
+    q.Dequeue();
+
+    return 0;
+}

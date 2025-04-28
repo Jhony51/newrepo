@@ -1,0 +1,292 @@
+#include<iostream>
+#include<fstream>
+#include<string>
+
+using namespace std;
+string rollNo, name, division;
+
+class Student
+{
+public:
+    void AddStudent()
+    {
+        ofstream file("StudentData.txt", ios::app);
+
+        if (file.is_open())
+        {
+            cout << "Please enter the information of student :" << endl;
+            cin.ignore();
+            cout << "Roll Number: ";
+            getline(cin, rollNo);
+            cout << "Name: ";
+            getline(cin, name);
+            cout << "Division: ";
+            getline(cin, division);
+
+            file << "\nRoll No:" << rollNo << "\nName:" << name << "\nDivision:" << division << "\n";
+
+            file.close();
+            cout << "Student data has been Added to StudentData.txt" << endl;
+
+        }
+        else
+        {
+            cout << "Error opening file!" << endl;
+        }
+    }
+
+    void DisplayStudent()
+    {
+        fstream file("StudentData.txt");
+
+        if (file.is_open())
+        {
+            string line;
+
+            cout << "=============== STUDENT DATA ====================\n";
+            while (getline(file, line))
+            {
+                cout << line << endl;
+            }
+            cout << "\n=================================================";
+
+            file.close();
+        }
+        else
+        {
+            cout << "Unable to open file.";
+        }
+
+    }
+
+    void DeleteStudent()
+    {
+        ifstream file("StudentData.txt");
+        ofstream newfile("temp.txt");
+
+        string delrollno;
+        cout << "Enter Roll Number of student to be deleted: ";
+        cin >> delrollno;
+
+        bool found = false;
+
+        if (file.is_open() && newfile.is_open())
+        {
+            string line;
+            while (getline(file, line))
+            {
+                if (line.empty())
+                {
+                    continue;
+                }
+
+                if (line.find("Roll No:" + delrollno) != string::npos)
+                {
+                    found = true;
+                    // Skip the next two lines which contain the student's name and division
+                    getline(file, line);
+                    getline(file, line);
+                    cout << "Student with Roll No: " << delrollno << " has been deleted." << endl;
+                }
+                else
+                {
+                    newfile << "\n" << line << endl;
+                    getline(file, line);
+                    newfile << line << endl;
+                    getline(file, line);
+                    newfile << line << endl;
+                }
+            }
+
+            if (!found)
+            {
+                cout << "Student with Roll No: " << delrollno << " not found." << endl;
+            }
+
+            file.close();
+            newfile.close();
+
+            remove("StudentData.txt");
+            rename("temp.txt", "StudentData.txt");
+        }
+        else
+        {
+            cout << "Unable to open file." << endl;
+        }
+    }
+
+    void SearchStudent()
+    {
+        ifstream file("StudentData.txt");
+
+        string serstudentrol;
+        cout << "Enter Roll Number of student to be search: ";
+        cin >> serstudentrol;
+
+        bool found = false;
+
+        if (file.is_open())
+        {
+            string line;
+            while (getline(file, line))
+            {
+                if (line.empty())
+                {
+                    continue;
+                }
+
+                if (line.find("Roll No:" + serstudentrol) != string::npos)
+                {
+                    found = true;
+                    cout << "Student with Roll No: " << serstudentrol << " found.\n" << endl;
+                    cout << line << endl;// Print the roll number line
+                    // Print the next two lines (name and division)
+                    getline(file, line);
+                    cout << line << endl;
+                    getline(file, line);
+                    cout << line << endl;
+                    break;
+
+                }
+            }
+            if (!found)
+            {
+                cout << "Student with Roll No: " << serstudentrol << " not found." << endl;
+            }
+            file.close();
+        }
+        else
+        {
+            cout << "Unable to open file." << endl;
+        }
+    }
+
+    void ModifyStudent()
+    {
+        ifstream file("StudentData.txt");
+        ofstream newfile("temp.txt");
+
+        string modrollno;
+        cout << "Enter Roll Number of student to be modified: ";
+        cin >> modrollno;
+
+        bool found = false;
+
+        if (file.is_open() && newfile.is_open())
+        {
+            string line;
+            while (getline(file, line))
+            {
+                if (line.empty())
+                {
+                    continue;
+                }
+
+                if (line.find("Roll No:" + modrollno) != string::npos)
+                {
+                    found = true;
+                    cout << "Student with Roll No: " << modrollno << " found." << endl;
+
+                    //New details 
+                    cout << "Enter new Name: ";
+                    cin.ignore();
+                    getline(cin, name);
+                    cout << "Enter new Division: ";
+                    getline(cin, division);
+
+                    // Write the modified data to the temp file
+                    newfile << "\nRoll No:" << modrollno << "\nName:" << name << "\nDivision:" << division << "\n";
+
+                    // Skip the old name and division lines in the original file
+                    getline(file, line);
+                    getline(file, line);
+                    cout << "student record MODIFIED succesfully.";
+                }
+                else
+                {
+                    newfile << "\n" << line << endl;
+                    getline(file, line);
+                    newfile << line << endl;
+                    getline(file, line);
+                    newfile << line << endl;
+                }
+            }
+
+            if (!found)
+            {
+                cout << "Student with Roll No: " << modrollno << " not found." << endl;
+            }
+
+            file.close();
+            newfile.close();
+
+            remove("StudentData.txt");
+            rename("temp.txt", "StudentData.txt");
+        }
+        else
+        {
+            cout << "Unable to open file." << endl;
+        }
+    }
+};
+
+int main()
+{
+    Student s;
+    ofstream file("StudentData.txt");
+    file.clear();
+    file.close();
+
+    bool flag = true;
+    while (flag)
+    {
+        int ch;
+        cout << "\n1)Add Student Record\n2)Display Student Record\n3)Delete a Student Record\n4)Search Student\n5)Modify Student record\n6)Exit\nEnter your choice:\n";
+        cin >> ch;
+
+        switch (ch)
+        {
+
+        case 1:
+        {
+            s.AddStudent();
+            break;
+        }
+
+        case 2:
+        {
+            s.DisplayStudent();
+            break;
+        }
+
+        case 3:
+        {
+            s.DeleteStudent();
+            break;
+        }
+
+        case 4:
+        {
+            s.SearchStudent();
+            break;
+        }
+
+        case 5:
+        {
+            s.ModifyStudent();
+            break;
+        }
+        case 6:
+        {
+            flag = false;
+        }
+
+        default:
+        {
+            cout << "Enter correct choice." << endl;
+        }
+
+        }
+    }
+    return 0;
+}

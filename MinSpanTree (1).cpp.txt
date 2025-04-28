@@ -1,0 +1,248 @@
+#include <iostream>
+#include <algorithm>
+#include <climits>
+#define MAX 20
+
+using namespace std;
+
+struct Edge
+{
+    int vertex_1, vertex_2, weight;
+};
+
+class Graph
+{
+private:
+    int adjacencyMatrix[MAX][MAX];
+    bool visited[MAX];
+    int vertices, edges;
+    Edge edge[MAX];
+
+public:
+    Graph()
+    {
+        vertices = 0;
+        edges = 0;
+        for (int i = 0; i < MAX; i++)
+        {
+            for (int j = 0; j < MAX; j++)
+            {
+                adjacencyMatrix[i][j] = 0;
+            }
+        }
+    }
+
+    void createGraph()
+    {
+        cout << "Enter number of vertices: ";
+        cin >> vertices;
+        while (vertices <= 0 || vertices > MAX)
+        {
+            cout << "Vertices must be greater than 0 and less than or equal to " << MAX << "!" << endl;
+            cout << "Please re-enter number of vertices: ";
+            cin >> vertices;
+        }
+
+        cout << "Enter number of edges: ";
+        cin >> edges;
+        while (edges < 0 || edges > (vertices * (vertices - 1) / 2))
+        {
+            cout << "Edges cannot be negative or greater than " << (vertices * (vertices - 1) / 2) << "!" << endl;
+            cout << "Please re-enter number of edges: ";
+            cin >> edges;
+        }
+
+        for (int i = 0; i < edges; i++)
+        {
+            cout << "\nEdge " << (i + 1) << endl;
+            int v1, v2, w;
+
+            cout << "Vertex 1: ";
+            cin >> v1;
+            while (v1 >= vertices || v1 < 0)
+            {
+                cout << "Vertex cannot be greater than " << (vertices - 1) << " or negative!" << endl;
+                cout << "Please re-enter Vertex 1: ";
+                cin >> v1;
+            }
+
+            cout << "Vertex 2: ";
+            cin >> v2;
+            while (v2 >= vertices || v2 < 0)
+            {
+                cout << "Vertex cannot be greater than " << (vertices - 1) << " or negative!" << endl;
+                cout << "Please re-enter Vertex 2: ";
+                cin >> v2;
+            }
+
+            if (v1 == v2)
+            {
+                cout << "Loops not permitted!" << endl;
+                continue;
+            }
+
+            cout << "Enter weight: ";
+            cin >> w;
+            while (w <= 0)
+            {
+                cout << "Weight of edge cannot be negative or zero!" << endl;
+                cout << "Please re-enter weight: ";
+                cin >> w;
+            }
+
+            adjacencyMatrix[v1][v2] = w;
+            adjacencyMatrix[v2][v1] = w;
+            edge[i].vertex_1 = v1;
+            edge[i].vertex_2 = v2;
+            edge[i].weight = w;
+        }
+
+        cout << "\nInsertion process complete!" << endl;
+        cout << "Matrix is:" << endl;
+        for (int i = 0; i < vertices; i++)
+        {
+            for (int j = 0; j < vertices; j++)
+            {
+                cout << adjacencyMatrix[i][j] << "\t";
+            }
+            cout << endl;
+        }
+    }
+
+    void Prims_MST()
+    {
+        if (vertices == 0 || edges == 0)
+        {
+            cout << "Graph Empty!" << endl;
+            return;
+        }
+
+        fill(begin(visited), end(visited), false);
+        visited[0] = true;
+
+        cout << "Minimum Spanning Tree (Prim's Algorithm)" << endl;
+        cout << "Edge\t | Weight" << endl;
+
+        int minimum_cost = 0;
+        int visited_edges = 0;
+
+        while (visited_edges < (vertices - 1))
+        {
+            int min = INT_MAX;
+            int r = -1, c = -1;
+
+            for (int i = 0; i < vertices; ++i)
+            {
+                if (visited[i])
+                {
+                    for (int j = 0; j < vertices; ++j)
+                    {
+                        if (!visited[j] && adjacencyMatrix[i][j] && adjacencyMatrix[i][j] < min)
+                        {
+                            min = adjacencyMatrix[i][j];
+                            r = i;
+                            c = j;
+                        }
+                    }
+                }
+            }
+
+            if (r == -1 || c == -1)
+                break; // No more edges to add
+
+            minimum_cost += min;
+            cout << r << " -> " << c << "\t | " << min << endl;
+            visited[c] = true;
+            visited_edges += 1;
+        }
+        cout << "Minimum Cost: " << minimum_cost << endl;
+    }
+
+    void sort_graph()
+    {
+        sort(edge, edge + edges, [](Edge a, Edge b)
+             { return a.weight < b.weight; });
+
+        cout << "\nSorted list of edges:" << endl;
+        cout << "Edge\t | Weight" << endl;
+
+        for (int i = 0; i < edges; i++)
+        {
+            cout << edge[i].vertex_1 << " -> " << edge[i].vertex_2 << "\t | " << edge[i].weight << endl;
+        }
+    }
+
+    void Kruskals_MST()
+    {
+        if (vertices == 0 || edges == 0)
+        {
+            cout << "Graph Empty!" << endl;
+            return;
+        }
+
+        cout << "\nEdge array is:" << endl;
+        cout << "Edge\t | Weight" << endl;
+        for (int i = 0; i < edges; i++)
+        {
+            cout << edge[i].vertex_1 << " -> " << edge[i].vertex_2 << "\t | " << edge[i].weight << endl;
+        }
+
+        sort_graph();
+
+        // Union-Find setup
+        int parent[MAX];
+        for (int i = 0; i < vertices; i++)
+        {
+            parent[i] = i;
+        }
+
+        Edge output[MAX];
+        int count = 0;
+
+        for (int j = 0; j < edges && count < vertices - 1; j++)
+        {
+            int u = edge[j].vertex_1;
+            int v = edge[j].vertex_2;
+
+            // Find the parent of u
+            int parent_u = u;
+            while (parent[parent_u] != parent_u)
+            {
+                parent_u = parent[parent_u];
+            }
+
+            // Find the parent of v
+            int parent_v = v;
+            while (parent[parent_v] != parent_v)
+            {
+                parent_v = parent[parent_v];
+            }
+
+            // If they are not in the same set, include this edge
+            if (parent_u != parent_v)
+            {
+                output[count++] = edge[j];
+                parent[parent_u] = parent_v; // Union
+            }
+        }
+
+        int cost = 0;
+        cout << "\nMinimum Spanning Tree (Kruskal's Algorithm)" << endl;
+        cout << "Edge\t | Weight" << endl;
+        for (int i = 0; i < count; i++)
+        {
+            cout << output[i].vertex_1 << " -> " << output[i].vertex_2 << "\t | " << output[i].weight << endl;
+            cost += output[i].weight;
+        }
+        cout << "Minimum Cost: " << cost << endl;
+    }
+};
+
+int main()
+{
+    Graph G;          // Constructor
+    G.createGraph();  // Method to create graph.
+    G.Prims_MST();    // Method to determine Minimum Spanning Tree using Prim's Algorithm.
+    G.Kruskals_MST(); // Method to determine Minimum Spanning Tree using Kruskal's Algorithm.
+    return 0;
+}

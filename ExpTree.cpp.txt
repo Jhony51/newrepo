@@ -1,0 +1,260 @@
+#include <iostream>
+#include <stack>
+using namespace std;
+
+struct Node
+{
+    char data;
+    Node *left;
+    Node *right;
+
+    Node(char value)
+    {
+        data = value;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+class traversals
+{
+public:
+    void inorderRecursive(Node *root)
+    {
+        if (root == nullptr)
+        {
+            return;
+        }
+
+        inorderRecursive(root->left);
+        cout << root->data << " ";
+        inorderRecursive(root->right);
+    }
+
+    void preorderRecursive(Node *root)
+    {
+        if (root == nullptr)
+        {
+            return;
+        }
+
+        cout << root->data << " ";
+        preorderRecursive(root->left);
+        preorderRecursive(root->right);
+    }
+
+    void postorderRecursive(Node *root)
+    {
+        if (root == nullptr)
+        {
+            return;
+        }
+
+        postorderRecursive(root->left);
+        postorderRecursive(root->right);
+        cout << root->data << " ";
+    }
+
+    void inorderNonRecursive(Node *root)
+    {
+        stack<Node *> s;
+        Node *current = root;
+
+        while (current != nullptr || !s.empty())
+        {
+            while (current != nullptr)
+            {
+                s.push(current);
+                current = current->left;
+            }
+
+            current = s.top();
+            s.pop();
+            cout << current->data << " ";
+            current = current->right;
+        }
+    }
+
+    void preorderNonRecursive(Node *root)
+    {
+        if (root == nullptr)
+            return;
+        stack<Node *> s;
+        s.push(root);
+
+        while (!s.empty())
+        {
+            Node *current = s.top();
+            s.pop();
+            cout << current->data << " ";
+
+            if (current->right)
+            {
+                s.push(current->right);
+            }
+            if (current->left)
+            {
+                s.push(current->left);
+            }
+        }
+    }
+
+    void postorderNonRecursive(Node *root)
+    {
+        if (root == nullptr)
+        {
+            return;
+        }
+
+        stack<Node*> s1, s2;
+        s1.push(root);
+
+        while (!s1.empty())
+        {
+            Node *current = s1.top();
+            s1.pop();
+            s2.push(current);
+
+            if (current->left)
+            {
+                s1.push(current->left);
+            }
+            if (current->right)
+            {
+                s1.push(current->right);
+            }
+        }
+
+        while (!s2.empty())
+        {
+            cout << s2.top()->data << " ";
+            s2.pop();
+        }
+    }
+
+    Node *constructTreeFromPostfix(const string &postfix)
+    {
+        stack<Node *> st;
+        for (char ch : postfix)
+        {
+            if (isalnum(ch))
+            {
+                st.push(new Node(ch));
+            }
+
+            else
+            {
+                Node *newNode = new Node(ch);
+
+                if(!st.empty())
+                {
+                    newNode->right = st.top();
+                    st.pop();
+                }
+                else
+                {
+                    cout<<"Invalid Post fix expression";
+                }
+                
+                if(!st.empty())
+                {
+                    newNode->left = st.top();
+                    st.pop();
+                }
+                else
+                {
+                    cout<<"Invalid Post fix expression";
+                }
+                st.push(newNode);
+            }
+        }
+        return st.top();
+    }
+};
+
+int main()
+{
+    traversals tr;
+    string postfix;
+    cout << "Enter a postfix expression: ";
+    cin >> postfix;
+
+    Node *root = tr.constructTreeFromPostfix(postfix);
+
+    bool flag = true;
+
+    while (flag)
+    {
+        int choice;
+        cout << "\nChoose Traversal Type:" << endl;
+        cout << "1. Recursive In-order Traversal"<< endl;
+        cout << "2. Recursive Pre-order Traversal"<< endl;
+        cout << "3. Recursive Post-order Traversal"<< endl;
+        cout << "4. Non-recursive In-order Traversal " << endl;
+        cout << "5. Non-recursive Pre-orderTraversal " << endl;
+        cout << "6. Non-recursive Post-order Traversal " << endl;
+        cout << "7. Exit" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice)
+        {
+        case 1:
+        {
+            cout << "Recursive In-order: ";
+            tr.inorderRecursive(root);
+            cout << endl;
+            break;
+        }
+        case 2:
+        {
+            cout << "Recursive Pre-order: ";
+            tr.preorderRecursive(root);
+            cout << endl;
+            break;
+        }
+        case 3:
+
+        {
+            cout << "Recursive Post-order: ";
+            tr.postorderRecursive(root);
+            cout << endl;
+            break;
+        }
+        case 4:
+        {
+            cout << "Non-recursive In-order: ";
+            tr.inorderNonRecursive(root);
+            cout << endl;
+            break;
+        }
+        case 5:
+        {
+            cout << "Non-recursive Pre-order: ";
+            tr.preorderNonRecursive(root);
+            cout << endl;
+            break;
+        }
+        case 6:
+        {
+            cout << "Non-recursive Post-order: ";
+            tr.postorderNonRecursive(root);
+            cout << endl;
+            break;
+        }
+        case 7:
+        {
+            flag = false;
+            cout << "Exiting..." << endl;
+
+            break;
+        }
+        default:
+        {
+
+            cout << "Enter correct choice." << endl;
+        }
+        }
+    }
+    return 0;
+}
